@@ -44,6 +44,7 @@ pip-delete-this-directory.txt
 new_dash_audatex.saas.appdynamics.com.json
 update_dash_audatex.saas.appdynamics.com.json
 Synthetic Pricing Calculator (1).gsheet
+.DS_Store
 
 # Unit test / coverage reports
 htmlcov/
