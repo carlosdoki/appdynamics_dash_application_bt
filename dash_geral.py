@@ -459,6 +459,7 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
             print('@', new_widget['x'], new_widget['y'])
 
             new_widget['adqlQueryList'][0] = "SELECT count(requestGUID) AS \"Qtde. de Requisições\" FROM transactions WHERE transactionName = \"{}\"".format(app)
+            new_widget['isIncreaseGood'] = True
 
             widgets.append(deepcopy(new_widget))
             counter += 1
@@ -483,6 +484,9 @@ def atualizacao():
             widget['dashboardId'] = int(update)
             del widget['version']
             del widget['id']
+            if 'isIncreaseGood' in widget :
+                widget['isIncreaseGood'] = True            
+
             if widget['widgetsMetricMatchCriterias'] != None:
                 for wmmc in widget['widgetsMetricMatchCriterias']:
                     wmmc['dashboardId'] = int(update)
