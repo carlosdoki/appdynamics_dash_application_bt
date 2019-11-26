@@ -11,7 +11,7 @@ from copy import deepcopy
 WIDGETS_PER_LINE = 3
 
 x_offset = 293
-y_offset = 90
+y_offset = 155
 
 host = ''
 port = ''
@@ -116,11 +116,13 @@ def put_dashboard(host, port, user, password, account, dashboard):
 def update_dashboard(host, port, user, password, account, dashboard, new_dash):
     global dashboard_id
     url = '{}:{}/controller/restui/dashboards/updateDashboard'.format(host, port)
+
     headers = {
         'Content-Type':'application/json;charset=UTF-8',
         'Accept':'application/json,text/plain,*/*',
         'X-CSRF-TOKEN' : token
     }
+    
     files = {
         'file': (dashboard, open(dashboard, 'rb')),
     }
@@ -132,6 +134,7 @@ def update_dashboard(host, port, user, password, account, dashboard, new_dash):
         json_data = json.loads(response.content)
         print("Apagando o dashboard criado")
         url = '{}:{}/controller/restui/dashboards/deleteDashboards'.format(host, port)
+        
         headers = {
             'Content-Type':'application/json;charset=UTF-8',
             'Accept':'application/json,text/plain,*/*',
@@ -454,8 +457,6 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
                 new_widget["useMetricBrowserAsDrillDown"] = False
 
             print('@', new_widget['x'], new_widget['y'])
-            print("*******")
-            print(new_widget['adqlQueryList'])
 
             new_widget['adqlQueryList'][0] = "SELECT count(requestGUID) AS \"Qtde. de Requisições\" FROM transactions WHERE transactionName = \"{}\"".format(app)
 
@@ -465,46 +466,47 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
 
 def atualizacao():
     global line_position_atual
-    dashboard = get_dashboard(host, port, user, password, account, dashboard_id)
-    new_dash = dashboard
+    global update
     
-    host2=host.replace("http://", "")
-    host2=host2.replace("https://", "")
+    if update > 0:
+        dashboard = get_dashboard(host, port, user, password, account, dashboard_id)
+        new_dash = dashboard
+        host2=host.replace("http://", "")
+        host2=host2.replace("https://", "")
+        new_dash['id'] = int(update)
+        new_dash['name'] = nome
+        new_dash['height'] = line_position_atual + 100
+        # y = 2142
 
-    new_dash['id'] = int(update)
-    new_dash['name'] = nome
-    new_dash['height'] = line_position_atual + 100
-    # y = 2142
-
-    for widget in new_dash['widgets']:
-        widget['guid'] = str(uuid.uuid4())
-        widget['dashboardId'] = int(update)
-        del widget['version']
-        del widget['id']
-        if widget['widgetsMetricMatchCriterias'] != None:
-            for wmmc in widget['widgetsMetricMatchCriterias']:
-                wmmc['dashboardId'] = int(update)
-                del wmmc['id']
-                for wmc, value in wmmc['metricMatchCriteria'].items():
-                    #print(wmc)
-                    #print(value)
-                    if wmc == 'id':
-                        del wmc
-                    else:
-                        if wmc == 'version':
+        for widget in new_dash['widgets']:
+            widget['guid'] = str(uuid.uuid4())
+            widget['dashboardId'] = int(update)
+            del widget['version']
+            del widget['id']
+            if widget['widgetsMetricMatchCriterias'] != None:
+                for wmmc in widget['widgetsMetricMatchCriterias']:
+                    wmmc['dashboardId'] = int(update)
+                    del wmmc['id']
+                    for wmc, value in wmmc['metricMatchCriteria'].items():
+                        #print(wmc)
+                        #print(value)
+                        if wmc == 'id':
                             del wmc
                         else:
-                            if wmc == 'affectedEntityMatchCriteria':
-                                for aemc, v in value.items():
-                                    if aemc == 'id' or aemc == 'missingEntities' or aemc == 'version':
-                                        del aemc
-                    
+                            if wmc == 'version':
+                                del wmc
+                            else:
+                                if wmc == 'affectedEntityMatchCriteria':
+                                    for aemc, v in value.items():
+                                        if aemc == 'id' or aemc == 'missingEntities' or aemc == 'version':
+                                            del aemc
+                        
 
-    with open('update_dash_{}.json'.format(host2), 'w') as outfile:
-        json.dump(new_dash, outfile, indent=4, sort_keys=False)
+        with open('update_dash_{}.json'.format(host2), 'w') as outfile:
+            json.dump(new_dash, outfile, indent=4, sort_keys=False)
 
-    print("Update do Dashboard", 'update_dash_{}.json'.format(host2))
-    update_dashboard(host, port, user, password, account, 'update_dash_{}.json'.format(host2),new_dash)
+        print("Update do Dashboard", 'update_dash_{}.json'.format(host2))
+        update_dashboard(host, port, user, password, account, 'update_dash_{}.json'.format(host2),new_dash)
 
 def process(dash):
     global nome
@@ -556,7 +558,7 @@ def process(dash):
                                                     widget, widget['x'], widget['y'], dashboards)
 
     new_dash['widgetTemplates'] = new_widgets
-
+    new_dash['name'] = nome
     new_dash['height'] = line_position_atual + 100
 
     # print(json.dumps(new_dash, indent=4, sort_keys=True))
@@ -565,7 +567,7 @@ def process(dash):
     with open('new_dash_{}.json'.format(host2), 'w') as outfile:
         json.dump(new_dash, outfile, indent=4, sort_keys=True)
 
-    if importacao == '1' or update != '0':
+    if importacao == '1' and update != '0':
         print("Importacao do Dashboard", 'new_dash_{}.json'.format(host))
         put_dashboard(host, port, user, password, account, 'new_dash_{}.json'.format(host2))
 
