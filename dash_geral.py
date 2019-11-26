@@ -606,7 +606,7 @@ def main():
             atualizacao()
 
     else:
-        print 'dash_crefisa_aplicacao.py <http(s)://host> <port> <user> <password> <account> <nome da aplicacao> <importacao>'
+        print 'dash_geral.py <http(s)://host> <port> <user> <password> <account> <nome da aplicacao> <importacao>'
         sys.exit(2)
 
 
