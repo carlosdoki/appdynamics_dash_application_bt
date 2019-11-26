@@ -11,7 +11,7 @@ from copy import deepcopy
 WIDGETS_PER_LINE = 3
 
 x_offset = 293
-y_offset = 155
+y_offset = 100
 
 host = ''
 port = ''
