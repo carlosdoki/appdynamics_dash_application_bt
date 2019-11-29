@@ -31,7 +31,8 @@ millis = int(round(time.time() * 1000))
 # 7 - Dias 604800000
 # 3 - Dias 259200000
 # 1 - Dia 86400000
-millis7 = millis - 86400000
+# 1 - Hora 3600000
+millis7 = millis - 3600000
 
 def get_auth(host, port, user, password, account):
     url = '{}:{}/controller/auth'.format(host, port)
@@ -176,7 +177,7 @@ def create_widgets_labels(APPS, widget_template, dashboards):
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']):
+        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
         #if (application['name'] == 'Arquivos'):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
@@ -313,7 +314,7 @@ def create_widgets_metric(APPS, widget_template, start_x, start_y, dashboards):
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']):
+        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
         #if (application['name'] == 'Arquivos'):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
@@ -353,7 +354,7 @@ def create_widgets_pie(APPS, widget_template, start_x, start_y, dashboards):
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']):
+        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
         #if (application['name'] == 'Arquivos'):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
@@ -436,7 +437,7 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']):
+        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
             print('Creating metrics for', app)
@@ -535,6 +536,16 @@ def process(dash):
     # print(APPS)
     for widget in new_dash['widgetTemplates']:
         if widget['description'] == "noreplicate":
+            if widget['widgetType'] == 'EventListWidget':
+                widget['eventFilterTemplate']['applicationName'] = nomeAplicacao
+                for entity in widget['eventFilterTemplate']['healthRuleNames']:
+                    entity["applicationName"] = nomeAplicacao
+            if widget['widgetType'] == 'HealthListWidget':
+                widget['applicationReference']['applicationName'] = nomeAplicacao
+            if widget['widgetType'] == 'TextWidget' and ('strong' in widget['text']):
+                widget['text'] = '<strong>' + nomeAplicacao
+            if widget['widgetType'] == 'GraphWidget':
+                widget['dataSeriesTemplates'][0]['metricMatchCriteriaTemplate']['applicationName'] = nomeAplicacao
             new_widgets.append(deepcopy(widget))
         else:
             if widget['widgetType'] == 'IFrameWidget':
