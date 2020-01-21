@@ -10,8 +10,8 @@ from copy import deepcopy
 
 WIDGETS_PER_LINE = 3
 
-x_offset = 293
-y_offset = 100
+x_offset = 280
+y_offset = 70
 
 host = ''
 port = ''
@@ -24,7 +24,10 @@ nomeAplicacao = 0
 update = 0
 importacao = 0
 dashboard_id = 0
+grupo = 0
+agrupo = []
 nome = ''
+nomegrupo = ''
 applicationID=0
 line_position_atual=0
 millis = int(round(time.time() * 1000))
@@ -168,6 +171,8 @@ def get_dashboard(host, port, user, password, account, dashboard_id):
 def create_widgets_labels(APPS, widget_template, dashboards):
     print('Creating Labels')
     global line_position_atual
+    global grupo
+    global agrupo
     widgets = []
     # start_x = 10
     start_x = widget_template['x']
@@ -177,8 +182,17 @@ def create_widgets_labels(APPS, widget_template, dashboards):
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
+        bachou = False
+        if (grupo == '1'):
+            for nomeBt in agrupo:
+                if (application['name'] == unicode(nomeBt, "utf-8")):
+                    bachou = True
+        else: 
+            if ((application['name'] != 'Paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name'])): 
+                bachou = True
         #if (application['name'] == 'Arquivos'):
+        print(bachou)
+        if (bachou == True):   
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
             print('Creating label for', app)
@@ -193,13 +207,13 @@ def create_widgets_labels(APPS, widget_template, dashboards):
             base_x = start_x + line_position * x_offset
 
             if line_position_atual <  current_y:
-               line_position_atual =  current_y
+                line_position_atual =  current_y
 
             # new_widget['x'] = base_x + ((275 - len(app) * 10) / 2)
             new_widget['x'] = base_x 
 
             print('@', new_widget['x'], new_widget['y'])
-            new_widget["fontSize"] = 14
+            #new_widget["fontSize"] = 14
             if len(new_widget["text"]) > 40:
                 new_widget["fontSize"] = 12
             if len(new_widget["text"]) > 50:
@@ -309,13 +323,24 @@ def create_widgets_graph(APPS, widget_template, start_x, start_y, dashboards):
 
 
 def create_widgets_metric(APPS, widget_template, start_x, start_y, dashboards):
+    global grupo
+    global agrupo
+
     widgets = []
     current_y = start_y
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
+        bachou= False
+        if (grupo == '1'):
+            for nomeBt in agrupo:
+                if (application['name'] == unicode(nomeBt, "utf-8")):
+                    bachou = True
+        else: 
+            if ((application['name'] != 'Paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name'])): 
+                bachou = True
         #if (application['name'] == 'Arquivos'):
+        if (bachou):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
             print('Creating metrics for', app)
@@ -349,13 +374,25 @@ def create_widgets_metric(APPS, widget_template, start_x, start_y, dashboards):
     return widgets
 
 def create_widgets_pie(APPS, widget_template, start_x, start_y, dashboards):
+    global grupo
+    global agrupo
+
     widgets = []
     current_y = start_y
 
+
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
+        bachou = False
+        if (grupo == '1'):
+            for nomeBt in agrupo:
+                if (application['name'] == unicode(nomeBt, "utf-8")):
+                    bachou = True
+        else: 
+            if ((application['name'] != 'Paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name'])): 
+                bachou = True
         #if (application['name'] == 'Arquivos'):
+        if (bachou):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
             print('Creating metrics for', app)
@@ -434,13 +471,25 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
     widgets = []
     current_y = start_y
     global line_position_atual
+    global grupo
+    global agrupo
+
 
     counter = 0
     for application in APPS:
-        if (application['name'] != 'paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name']):
+        bachou = False
+        if (grupo == '1'):
+            for nomeBt in agrupo:
+                if (application['name'] == unicode(nomeBt, "utf-8")):
+                    bachou = True
+        else: 
+            if ((application['name'] != 'Paginas') and (application['name'] != 'WCF') and ('All Other Traffic' not in application['name']) and ('/' not in application['name'])): 
+                bachou = True
+        #if (application['name'] == 'Arquivos'):
+        if (bachou):
             app = application['name']
             dash_id = find_dashboard(dashboards, application['name'])
-            print('Creating metrics for', app)
+            print('Creating Analytics for', app.encode('utf8'))
             new_widget = widget_template
             line_position = counter % WIDGETS_PER_LINE
 
@@ -459,7 +508,8 @@ def create_widgets_analytics(APPS, widget_template, start_x, start_y, dashboards
 
             print('@', new_widget['x'], new_widget['y'])
 
-            new_widget['adqlQueryList'][0] = "SELECT count(requestGUID) AS \"Qtde. de Requisições\" FROM transactions WHERE transactionName = \"{}\"".format(app)
+            #SELECT avg(responseTime) AS \"Response Time (ms) (Average)\" FROM transactions WHERE transactionName = \"Pedido de Exames de Imagem\"
+            new_widget['adqlQueryList'][0] = u"SELECT avg(responseTime) AS \"Response Time (ms) (Average)\" FROM transactions WHERE transactionName = \"{}\"".format(app).encode('utf-8')
             new_widget['isIncreaseGood'] = True
 
             widgets.append(deepcopy(new_widget))
@@ -518,6 +568,7 @@ def process(dash):
     global applicationID
     global update
     global line_position_atual
+    global nomegrupo
     
     get_auth(host, port, user, password, account)
     dashboards = get_dashboards(host, port, user, password, account)
@@ -527,9 +578,14 @@ def process(dash):
         if application['name'] == nomeAplicacao:
             applicationID = application['id']
 
-    update = find_dashboard(dashboards, nomeAplicacao + ' - Aplicacao')
-    new_dash = dash
-    nome = nomeAplicacao + ' - Aplicacao'
+    if ( nomegrupo != ''):
+        update = find_dashboard(dashboards, nomeAplicacao + ' - ' + nomegrupo)
+        new_dash = dash
+        nome = nomeAplicacao + ' - ' + nomegrupo
+    else:
+        update = find_dashboard(dashboards, nomeAplicacao + ' - Aplicacao')
+        new_dash = dash
+        nome = nomeAplicacao + ' - Aplicacao'
     
     new_widgets = []
     APPS = get_bts(host, port, user, password, account)
@@ -597,17 +653,29 @@ def main():
     global importacao
     global dashboard_id
     global nome
+    global grupo
+    global agrupo
+    global nomegrupo
 
-    if len(sys.argv) > 6:
+    if len(sys.argv) > 7:
         host = sys.argv[1] 
         port = sys.argv[2]
         user = sys.argv[3]
         password = sys.argv[4]
         account = sys.argv[5]
         nomeAplicacao = sys.argv[6]
+        grupo = sys.argv[7]
+        nomegrupo = sys.argv[8]
 
-        if len(sys.argv) == 8 :
-            importacao = sys.argv[7]
+        if len(sys.argv) == 10 :
+            importacao = sys.argv[9]
+ 
+        if (grupo == '1'):
+            fgrupo = open('grupo.txt', 'r')
+            f1 = fgrupo.readlines()
+            for x in f1:
+                agrupo.append(x.rstrip('\n'))
+            fgrupo.close
 
         with open('dashboard_aplicacao.json') as json_data:
             d = json.load(json_data)
@@ -617,7 +685,7 @@ def main():
             atualizacao()
 
     else:
-        print 'dash_geral.py <http(s)://host> <port> <user> <password> <account> <nome da aplicacao> <importacao>'
+        print 'dash_geral.py <http(s)://host> <port> <user> <password> <account> <nome da aplicacao> <somente grupo de bts> <nome do grupo> <importacao>'
         sys.exit(2)
 
 

@@ -1,0 +1,8 @@
+Atendimento de Solicitação de Produtos ao Estoque
+Cadastro de Ordem de Compras
+Cadastro de Solicitação de Compras
+Consolidação do Estoque
+Devolução de Produtos para Paciente
+Movimentações
+Saída de Produtos para Paciente
+Transferência de Produtos entre Estoques
